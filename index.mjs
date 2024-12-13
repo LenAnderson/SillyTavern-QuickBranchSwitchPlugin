@@ -17,7 +17,7 @@ const open = require('open');
 
 
 
-const roots = [];
+let roots = [];
 const initChat = (root, avatar, file)=>{
 	const char = avatar.replace(/(\.png)?$/, '');
 	const dirPath = path.resolve(path.join(...[

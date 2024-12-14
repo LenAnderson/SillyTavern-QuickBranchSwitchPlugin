@@ -18,6 +18,25 @@ const open = require('open');
 
 
 let roots = [];
+const initGroupChat = (root, groupId, file)=>{
+	const groupFilePath = path.resolve(path.join(root, 'groups', `${groupId}.json`));
+	if (!fs.existsSync(groupFilePath)) {
+		return [];
+	}
+	const group = JSON.parse(fs.readFileSync(groupFilePath, { encoding:'utf-8' }));
+	const chatFiles = group.chats.map(it=>`${it}.jsonl`);
+
+	const chats = [];
+	for (const f of chatFiles) {
+		const chatFilePath = path.resolve(path.join(root, 'group chats', f));
+		if (!fs.existsSync(chatFilePath)) continue;
+		chats.push(fs.readFileSync(chatFilePath, { encoding:'utf-8' })
+			.split('\n')
+			.map((line,idx)=>idx == 0 ? ({filename:f, ...JSON.parse(line)}) : JSON.parse(line))
+		);
+	}
+	return buildList(chats, file);
+};
 const initChat = (root, avatar, file)=>{
 	const char = avatar.replace(/(\.png)?$/, '');
 	const dirPath = path.resolve(path.join(...[
@@ -45,6 +64,9 @@ const initChat = (root, avatar, file)=>{
 			.map((line,idx)=>idx == 0 ? ({filename:f.name, ...JSON.parse(line)}) : JSON.parse(line))
 		);
 	}
+	return buildList(chats, file);
+};
+const buildList = (chats, file)=>{
 	const max = Math.max(...chats.map(it=>it.length));
 	const thisChatIdx = chats.findIndex(it=>it[0].filename == file);
 	const thisChat = chats.splice(thisChatIdx, 1);
@@ -104,6 +126,11 @@ export async function init(router) {
 
 	router.post('/init', jsonParser, (req, res)=>{
 		const list = initChat(req.user.directories.root, req.body.avatar, req.body.file);
+		res.send(list);
+	});
+
+	router.post('/initGroup', jsonParser, (req, res)=>{
+		const list = initGroupChat(req.user.directories.root, req.body.group, req.body.file);
 		res.send(list);
 	});
 }

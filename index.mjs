@@ -6,13 +6,7 @@ import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
 const require  = createRequire(import.meta.url);
 const path = require('path');
-const mime = require('mime-types');
-const sanitize = require('sanitize-filename');
 const fs = require('fs');
-const readline = require('readline');
-const jimp = require('jimp');
-const writeFileAtomicSync = require('write-file-atomic').sync;
-const open = require('open');
 
 
 
@@ -67,7 +61,6 @@ const initChat = (root, avatar, file)=>{
 	return buildList(chats, file);
 };
 const buildList = (chats, file)=>{
-	const max = Math.max(...chats.map(it=>it.length));
 	const thisChatIdx = chats.findIndex(it=>it[0].filename == file);
 	const thisChat = chats.splice(thisChatIdx, 1);
 	chats.unshift(...thisChat)
